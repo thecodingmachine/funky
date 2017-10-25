@@ -6,7 +6,11 @@ namespace TheCodingMachine\Funky;
 
 use Psr\Container\ContainerInterface;
 use ReflectionMethod;
+use ReflectionParameter;
 use TheCodingMachine\Funky\Annotations\Factory;
+use TheCodingMachine\Funky\Injections\ContainerInjection;
+use TheCodingMachine\Funky\Injections\Injection;
+use TheCodingMachine\Funky\Injections\ServiceInjection;
 
 class FactoryDefinition
 {
@@ -60,12 +64,51 @@ class FactoryDefinition
         return false;
     }
 
+    public function buildFactoryCode(string $functionName) : string
+    {
+        $returnTypeCode = '';
+        $returnType = $this->reflectionMethod->getReturnType();
+        if ($returnType) {
+            if ($returnType->isBuiltin()) {
+                $returnTypeCode = ': '.$this->reflectionMethod->getReturnType();
+            } else {
+                $returnTypeCode = ': \\'.$this->reflectionMethod->getReturnType();
+            }
+        }
+
+        return sprintf(<<<EOF
+    public static function %s(ContainerInterface \$container)%s
+    {
+        return %s::%s(%s);
+    }
+    
+EOF
+            , $functionName,
+            $returnTypeCode,
+            $this->reflectionMethod->getDeclaringClass()->getName(),
+            $this->reflectionMethod->getName(),
+            implode(', ', array_map(function(Injection $injection) {return $injection->getCode();}, $this->getInjections()))
+        );
+    }
+
     /**
      * Returns a list of services to be injected.
+     *
+     * @return Injection[]
      */
-    private function getInjections()
+    private function getInjections(): array
     {
-
+        return array_map(function(ReflectionParameter $reflectionParameter) {
+            $type = $reflectionParameter->getType();
+            // No type? Let's inject by parameter name.
+            if ($type === null || $type->isBuiltin()) {
+                return new ServiceInjection($reflectionParameter->getName(), !$reflectionParameter->allowsNull());
+            }
+            if (((string)$type) === ContainerInterface::class) {
+                return new ContainerInjection();
+            }
+            return new ServiceInjection((string)$type, !$reflectionParameter->allowsNull());
+        }, $this->getReflectionMethod()->getParameters());
     }
 
     /**

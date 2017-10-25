@@ -58,7 +58,11 @@ class ServiceProvider implements ServiceProviderInterface
     {
         $factories = [];
         foreach ($this->getFactoryDefinitions() as $definition) {
-            $factories[$definition->getName()] = [static::class, $definition->getReflectionMethod()->getName()];
+            if ($definition->isPsrFactory()) {
+                $factories[$definition->getName()] = [static::class, $definition->getReflectionMethod()->getName()];
+            } else {
+                // TODO
+            }
             foreach ($definition->getAliases() as $alias) {
                 $factories[$alias] = new Alias($definition->getName());
             }

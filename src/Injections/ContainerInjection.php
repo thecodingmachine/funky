@@ -1,7 +1,7 @@
 <?php
 declare (strict_types=1);
 
-namespace TheCodingMachine\Funky;
+namespace TheCodingMachine\Funky\Injections;
 
 
 class ContainerInjection implements Injection

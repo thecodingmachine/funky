@@ -5,8 +5,10 @@ namespace TheCodingMachine\Funky;
 
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
+use Psr\Log\LoggerInterface;
 use \ReflectionMethod;
 use TheCodingMachine\Funky\Annotations\Factory;
+use TheCodingMachine\Funky\Fixtures\TestServiceProvider;
 
 class FactoryDefinitionTest extends TestCase
 {
@@ -110,5 +112,22 @@ class FactoryDefinitionTest extends TestCase
             ['isAPsrFactory', true],
             ['isAPsrFactory2', true],
         ];
+    }
+
+    public function testBuildFactory()
+    {
+        $refMethod = new ReflectionMethod(TestServiceProvider::class, 'testFactory');
+        $factoryDefinition = new FactoryDefinition($refMethod, new Factory([]));
+
+        $code = $factoryDefinition->buildFactoryCode('foo');
+
+        $this->assertSame(<<<EOF
+    public static function foo(ContainerInterface \$container): \DateTimeInterface
+    {
+        return TheCodingMachine\Funky\Fixtures\TestServiceProvider::testFactory(\$container->get('Psr\\\\Log\\\\LoggerInterface'), \$container, \$container->get('foo'), \$container->has('bar')?\$container->get('bar'):null);
+    }
+    
+EOF
+            , $code);
     }
 }

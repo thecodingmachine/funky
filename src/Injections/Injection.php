@@ -1,7 +1,7 @@
 <?php
 
 
-namespace TheCodingMachine\Funky;
+namespace TheCodingMachine\Funky\Injections;
 
 
 interface Injection
