@@ -6,4 +6,5 @@
 /build/
 /infection-log.txt
 /infection.json.dist
-/vendor-bin/*
+/vendor-bin/cs/vendor/
+/vendor-bin/infection/vendor/

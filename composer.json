@@ -34,7 +34,10 @@
         }
     },
     "scripts": {
-        "phpstan": "phpstan analyse src -c phpstan.neon --level=7 --no-progress -vvv"
+        "phpstan": "phpstan analyse src -c phpstan.neon --level=7 --no-progress -vvv",
+        "cs": "php-cs-fixer fix",
+        "post-install-cmd": ["@composer bin all install --ansi"],
+        "post-update-cmd": ["@composer bin all update --ansi"]
     },
     "extra": {
         "branch-alias": {
