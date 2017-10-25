@@ -3,7 +3,6 @@ declare (strict_types=1);
 
 namespace TheCodingMachine\Funky\Injections;
 
-
 class ServiceInjection implements Injection
 {
     /**

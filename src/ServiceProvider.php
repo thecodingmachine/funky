@@ -84,7 +84,8 @@ class ServiceProvider implements ServiceProviderInterface
      * About factories parameters:
      *
      * - the container (instance of `Psr\Container\ContainerInterface`)
-     * - the entry to be extended. If the entry to be extended does not exist and the parameter is nullable, `null` will be passed.
+     * - the entry to be extended. If the entry to be extended does not exist and the parameter is nullable,
+     *   `null` will be passed.
      *
      * @return callable[]
      */

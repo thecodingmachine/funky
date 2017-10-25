@@ -3,7 +3,6 @@
 
 namespace TheCodingMachine\Funky;
 
-
 use Psr\Container\ContainerInterface;
 use ReflectionMethod;
 use ReflectionParameter;
@@ -46,7 +45,8 @@ class FactoryDefinition
     }
 
     /**
-     * Returns true if the signature of the reflection method is compatible with container-interop/service-provider factories.
+     * Returns true if the signature of the reflection method is compatible with container-interop/service-provider
+     * factories.
      */
     public function isPsrFactory(): bool
     {
@@ -76,18 +76,22 @@ class FactoryDefinition
             }
         }
 
-        return sprintf(<<<EOF
+        return sprintf(
+            <<<EOF
     public static function %s(ContainerInterface \$container)%s
     {
         return %s::%s(%s);
     }
     
 EOF
-            , $functionName,
+            ,
+            $functionName,
             $returnTypeCode,
             $this->reflectionMethod->getDeclaringClass()->getName(),
             $this->reflectionMethod->getName(),
-            implode(', ', array_map(function(Injection $injection) {return $injection->getCode();}, $this->getInjections()))
+            implode(', ', array_map(function (Injection $injection) {
+                return $injection->getCode();
+            }, $this->getInjections()))
         );
     }
 
@@ -98,7 +102,7 @@ EOF
      */
     private function getInjections(): array
     {
-        return array_map(function(ReflectionParameter $reflectionParameter) {
+        return array_map(function (ReflectionParameter $reflectionParameter) {
             $type = $reflectionParameter->getType();
             // No type? Let's inject by parameter name.
             if ($type === null || $type->isBuiltin()) {

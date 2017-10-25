@@ -23,5 +23,6 @@ script:
 - vendor/bin/phpunit --verbose;
 - composer phpstan
 - vendor/bin/infection --threads=4
+- composer cs-check
 after_success:
 - vendor/bin/coveralls -v

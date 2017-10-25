@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 namespace TheCodingMachine\Funky\Annotations;
+
 use Doctrine\Common\Annotations\AnnotationException;
 
 /**
@@ -60,7 +61,8 @@ class Factory
             $this->nameFromType = true;
         }
         if ($count > 1) {
-            throw new AnnotationException('Factory should have only one property in the list "name", "nameFromType", "nameFromMethodName". You can add aliases if you need several names.');
+            throw new AnnotationException('Factory should have only one property in the list "name", "nameFromType", '
+                .'"nameFromMethodName". You can add aliases if you need several names.');
         }
 
         if (isset($attributes['aliases']) && \is_array($attributes['aliases'])) {
