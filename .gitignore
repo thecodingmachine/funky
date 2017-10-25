@@ -1,0 +1,9 @@
+*~
+/vendor/*
+.*~
+/composer.lock
+/phpunit.xml
+/build/
+/infection-log.txt
+/infection.json.dist
+/vendor-bin/*
