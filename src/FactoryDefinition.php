@@ -58,10 +58,7 @@ class FactoryDefinition
             return true;
         }
         $parameter = $this->reflectionMethod->getParameters()[0];
-        if ($parameter !== null && (string) $parameter->getType() === ContainerInterface::class) {
-            return true;
-        }
-        return false;
+        return $parameter !== null && (string) $parameter->getType() === ContainerInterface::class;
     }
 
     public function buildFactoryCode(string $functionName) : string
@@ -87,7 +84,7 @@ EOF
             ,
             $functionName,
             $returnTypeCode,
-            $this->reflectionMethod->getDeclaringClass()->getName(),
+            '\\'.$this->reflectionMethod->getDeclaringClass()->getName(),
             $this->reflectionMethod->getName(),
             implode(', ', array_map(function (Injection $injection) {
                 return $injection->getCode();
