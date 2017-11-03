@@ -5,7 +5,6 @@ namespace TheCodingMachine\Funky;
 
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
-use Psr\Log\LoggerInterface;
 use \ReflectionMethod;
 use TheCodingMachine\Funky\Annotations\Factory;
 use TheCodingMachine\Funky\Fixtures\TestServiceProvider;
@@ -122,9 +121,9 @@ class FactoryDefinitionTest extends TestCase
         $code = $factoryDefinition->buildFactoryCode('foo');
 
         $this->assertSame(<<<EOF
-    public static function foo(ContainerInterface \$container): \DateTimeInterface
+    public static function foo(ContainerInterface \$container): string
     {
-        return TheCodingMachine\Funky\Fixtures\TestServiceProvider::testFactory(\$container->get('Psr\\\\Log\\\\LoggerInterface'), \$container, \$container->get('foo'), \$container->has('bar')?\$container->get('bar'):null);
+        return \TheCodingMachine\Funky\Fixtures\TestServiceProvider::testFactory(\$container->get('Psr\\\\Log\\\\LoggerInterface'), \$container, \$container->get('foo'), \$container->has('bar')?\$container->get('bar'):null);
     }
     
 EOF

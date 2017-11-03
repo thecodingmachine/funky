@@ -6,10 +6,21 @@ namespace TheCodingMachine\Funky;
 use Doctrine\Common\Annotations\AnnotationException;
 use Interop\Container\Factories\Alias;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
+use Simplex\Container;
 use TheCodingMachine\Funky\Annotations\Factory;
+use TheCodingMachine\Funky\Fixtures\TestServiceProvider;
+use TheCodingMachine\Funky\Utils\FileSystem;
 
 class ServiceProviderTest extends TestCase
 {
+    public static function setUpBeforeClass()
+    {
+        // Let's purge the cache
+        FileSystem::rmdir(sys_get_temp_dir().'/funky_cache');
+    }
+
     public function testFactoriesByType()
     {
         $sp = new class extends ServiceProvider {
@@ -99,5 +110,22 @@ class ServiceProviderTest extends TestCase
         $this->assertSame([get_class($sp), 'now'], $factories['foobar']);
         $this->assertArrayHasKey('baz', $factories);
         $this->assertEquals(new Alias('foobar'), $factories['baz']);
+    }
+
+    public function testDump()
+    {
+        $sp = new TestServiceProvider();
+
+        $factories = $sp->getFactories();
+
+        $simplex = new Container();
+        $simplex->set(LoggerInterface::class, function() { return new NullLogger(); });
+        $simplex->set('foo', 12);
+        $simplex->set('bar', 42);
+
+        $this->assertArrayHasKey('testFactory', $factories);
+        $result = $factories['testFactory']($simplex);
+
+        $this->assertSame(NullLogger::class.'1242', $result);
     }
 }

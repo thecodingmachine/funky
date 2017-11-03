@@ -12,10 +12,10 @@ use TheCodingMachine\Funky\ServiceProvider;
 class TestServiceProvider extends ServiceProvider
 {
     /**
-     * @Factory()
+     * @Factory(nameFromMethodName=true)
      */
-    public static function testFactory(LoggerInterface $logger, ContainerInterface $container, int $foo, $bar) : \DateTimeInterface
+    public static function testFactory(LoggerInterface $logger, ContainerInterface $container, int $foo, $bar) : string
     {
-
+        return get_class($logger).$foo.$bar;
     }
 }
