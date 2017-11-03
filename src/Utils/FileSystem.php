@@ -16,7 +16,7 @@ class FileSystem
             if (!is_dir($dir)) {
                 // The directory was not created by a concurrent process.
                 // Let's throw an exception with a developer friendly error message if we have one
-                if ($error) {
+                if ($error !== null) {
                     throw IoException::cannotCreateDirectory($dir, $error['message']);
                 }
                 throw IoException::cannotCreateDirectory($dir, 'unknown error');
