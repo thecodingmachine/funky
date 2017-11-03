@@ -97,7 +97,9 @@ class ServiceProvider implements ServiceProviderInterface
         $refClass = $this->getRefClass();
         $className = $this->getClassName();
 
-        $fileName = sys_get_temp_dir().'/funky_cache/'.str_replace(':', '', dirname($refClass->getFileName()).'/'.str_replace('\\', '__', $className).'.php');
+        $fileName = sys_get_temp_dir().'/funky_cache/'.
+            str_replace(':', '', dirname($refClass->getFileName()).'/'.
+            str_replace('\\', '__', $className).'.php');
 
         return [$className, $fileName];
     }
@@ -140,15 +142,19 @@ class ServiceProvider implements ServiceProviderInterface
         $factoryCount = 0;
         foreach ($this->getFactoryDefinitions() as $definition) {
             if ($definition->isPsrFactory()) {
-                $factoriesArrayCode[] = '            '.var_export($definition->getName(), true).' => ['.var_export($definition->getReflectionMethod()->getDeclaringClass()->getName(), true).', '.var_export($definition->getReflectionMethod()->getName(), true)."],\n";
+                $factoriesArrayCode[] = '            '.var_export($definition->getName(), true).
+                    ' => ['.var_export($definition->getReflectionMethod()->getDeclaringClass()->getName(), true).
+                    ', '.var_export($definition->getReflectionMethod()->getName(), true)."],\n";
             } else {
                 $factoryCount++;
                 $localFactoryName = 'factory'.$factoryCount;
-                $factoriesArrayCode[] = '            '.var_export($definition->getName(), true).' => [self::class, '.var_export($localFactoryName, true)."],\n";
+                $factoriesArrayCode[] = '            '.var_export($definition->getName(), true).
+                    ' => [self::class, '.var_export($localFactoryName, true)."],\n";
                 $factories[] = $definition->buildFactoryCode($localFactoryName);
             }
             foreach ($definition->getAliases() as $alias) {
-                $factoriesArrayCode[] = '            '.var_export($alias, true).' => new Alias('.var_export($definition->getName(), true)."),\n";
+                $factoriesArrayCode[] = '            '.var_export($alias, true).
+                    ' => new Alias('.var_export($definition->getName(), true)."),\n";
             }
         }
 
