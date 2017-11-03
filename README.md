@@ -154,6 +154,68 @@ public static function myService(string $ROOT_PATH) : MyService
 }
 ```
 
+Finally, at any point, you can also inject the whole container to fetch any dependency from it:
+
+```php
+/**
+ * @Factory()
+ */
+public static function myService(ContainerInterface $container) : MyService
+{
+    return new MyService($container->get('ROOT_PATH'));
+}
+```
+
+
+## Extending entries
+
+You can extend entries from the container using the `Extension` annotation.
+
+You should pass the entry to be extended as the first argument. The remaining arguments can be auto-wired just like you do with the factories.
+
+```php
+/**
+ * @Extension()
+ */
+public static function registerTwigExtension(\Twig_Environment $twig, MyTwigExtension $extension) : \Twig_Environment
+{
+    $twig->register($extension);
+    return $twig;
+}
+```
+
+### Specifying a name
+
+You can use the "name" or "nameFromMethodName" attribute of the `@Extension` annotation to specify the name of the entry to be extended:
+
+```
+@Extension(name="twig") // The extended entry is named "twig"
+```
+
+```php
+/**
+ * The extended entry is named twig because the method name is "twig"
+ * @Extension(name="twig") 
+ */
+public static function registerExtension(\Twig_Environment $twig, MyTwigExtension $extension) : \Twig_Environment
+{
+    // ...
+}
+```
+
+
+```php
+/**
+ * The extended entry is named "twig" because the method name is "twig"
+ * @Extension(nameFromMethodName=true) 
+ */
+public static function twig(\Twig_Environment $twig, MyTwigExtension $extension) : \Twig_Environment
+{
+    // ...
+}
+```
+
+
 ## FAQ
 
 
