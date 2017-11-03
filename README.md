@@ -126,6 +126,33 @@ public static function whoopsMiddleware() : WhoopsMiddleware
 $container->get('whoopsMiddleware') // will return the service
 ```
 
+## Auto-wiring
+
+Funky supports auto-wiring! You can simply add parameters with the appropriate type-hint in your factories and Funky will look for this dependencies in the container.
+
+```php
+/**
+ * @Factory()
+ */
+public static function myService(LoggerInterface $logger) : MyService
+{
+    // $logger is fetched from the container using "$container->get(LoggerInterface::class)"
+    return new MyService($logger);
+}
+```
+
+If you do not add type-hints (or use a scalar type-hint), Funky will try to fetch the dependency using the parameter name.
+
+```php
+/**
+ * @Factory()
+ */
+public static function myService(string $ROOT_PATH) : MyService
+{
+    // $ROOT_PATH is fetched from the container using "$container->get('ROOT_PATH')"
+    return new MyService(string $ROOT_PATH);
+}
+```
 
 ## FAQ
 
