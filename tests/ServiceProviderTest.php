@@ -127,5 +127,13 @@ class ServiceProviderTest extends TestCase
         $result = $factories['testFactory']($simplex);
 
         $this->assertSame(NullLogger::class.'1242', $result);
+
+        $extensions = $sp->getExtensions();
+
+        $this->assertArrayHasKey('testExtension', $extensions);
+        $result = $extensions['testExtension']($simplex, 42);
+
+        $this->assertSame('42'.NullLogger::class.'1242', $result);
+
     }
 }

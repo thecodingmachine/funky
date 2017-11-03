@@ -6,6 +6,7 @@ namespace TheCodingMachine\Funky;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Interop\Container\ServiceProviderInterface;
 use ReflectionClass;
+use TheCodingMachine\Funky\Annotations\Extension;
 use TheCodingMachine\Funky\Annotations\Factory;
 use TheCodingMachine\Funky\Utils\FileSystem;
 
@@ -15,6 +16,10 @@ class ServiceProvider implements ServiceProviderInterface
      * @var ReflectionClass
      */
     private $refClass;
+    /**
+     * @var string
+     */
+    private $className;
 
     private static $annotationReader;
 
@@ -29,11 +34,10 @@ class ServiceProvider implements ServiceProviderInterface
 
     /**
      * @return FactoryDefinition[]
-     * @throws \TheCodingMachine\Funky\BadModifierException
      */
     private function getFactoryDefinitions(): array
     {
-        $refClass = new ReflectionClass($this);
+        $refClass = $this->getRefClass();
         $factories = [];
 
         foreach ($refClass->getMethods() as $method) {
@@ -44,6 +48,38 @@ class ServiceProvider implements ServiceProviderInterface
         }
 
         return $factories;
+    }
+
+    /**
+     * @return ExtensionDefinition[]
+     */
+    private function getExtensionDefinitions(): array
+    {
+        $refClass = $this->getRefClass();
+        $extensions = [];
+
+        foreach ($refClass->getMethods() as $method) {
+            $extensionAnnotation = self::getAnnotationReader()->getMethodAnnotation($method, Extension::class);
+            if ($extensionAnnotation) {
+                $extensions[] = new ExtensionDefinition($method, $extensionAnnotation);
+            }
+        }
+
+        return $extensions;
+    }
+
+    private function init(): void
+    {
+        if ($this->className === null) {
+            [$className, $fileName] = $this->getFileAndClassName();
+            if (!file_exists($fileName) || filemtime($this->getRefClass()->getFileName()) > filemtime($fileName)) {
+                $this->dumpHelper();
+            }
+
+            require_once $fileName;
+
+            $this->className = $className;
+        }
     }
 
     /**
@@ -59,16 +95,34 @@ class ServiceProvider implements ServiceProviderInterface
      */
     public function getFactories()
     {
-        [$className, $fileName] = $this->getFileAndClassName();
-        if (!file_exists($fileName) || filemtime($this->getRefClass()->getFileName()) > filemtime($fileName)) {
-            $this->dumpHelper();
-        }
-
-        require_once $fileName;
-
-        $factoriesCallable = $className.'::getFactories';
-
+        $this->init();
+        $factoriesCallable = $this->className.'::getFactories';
         return $factoriesCallable();
+    }
+
+    /**
+     * Returns a list of all container entries extended by this service provider.
+     *
+     * - the key is the entry name
+     * - the value is a callable that will return the modified entry
+     *
+     * Callables have the following signature:
+     *        function(Psr\Container\ContainerInterface $container, $previous)
+     *     or function(Psr\Container\ContainerInterface $container, $previous = null)
+     *
+     * About factories parameters:
+     *
+     * - the container (instance of `Psr\Container\ContainerInterface`)
+     * - the entry to be extended. If the entry to be extended does not exist and the parameter is nullable,
+     *   `null` will be passed.
+     *
+     * @return callable[]
+     */
+    public function getExtensions()
+    {
+        $this->init();
+        $extensionsCallable = $this->className.'::getExtensions';
+        return $extensionsCallable();
     }
 
     /**
@@ -161,6 +215,20 @@ class ServiceProvider implements ServiceProviderInterface
         $factoriesArrayStr = implode("\n", $factoriesArrayCode);
         $factoriesStr = implode("\n", $factories);
 
+        $extensionsArrayCode = [];
+        $extensions = [];
+        $extensionCount = 0;
+        foreach ($this->getExtensionDefinitions() as $definition) {
+            $extensionCount++;
+            $localExtensionName = 'extension'.$extensionCount;
+            $extensionsArrayCode[] = '            '.var_export($definition->getName(), true).
+                ' => [self::class, '.var_export($localExtensionName, true)."],\n";
+            $extensions[] = $definition->buildExtensionCode($localExtensionName);
+        }
+
+        $extensionsArrayStr = implode("\n", $extensionsArrayCode);
+        $extensionsStr = implode("\n", $extensions);
+
         $code = <<<EOF
 <?php
 $namespace
@@ -177,33 +245,18 @@ $factoriesArrayStr
         ];
     }
     
+    public static function getExtensions(): array
+    {
+        return [
+$extensionsArrayStr
+        ];
+    }
+    
 $factoriesStr
+$extensionsStr
 }
 EOF;
 
         return $code;
-    }
-
-    /**
-     * Returns a list of all container entries extended by this service provider.
-     *
-     * - the key is the entry name
-     * - the value is a callable that will return the modified entry
-     *
-     * Callables have the following signature:
-     *        function(Psr\Container\ContainerInterface $container, $previous)
-     *     or function(Psr\Container\ContainerInterface $container, $previous = null)
-     *
-     * About factories parameters:
-     *
-     * - the container (instance of `Psr\Container\ContainerInterface`)
-     * - the entry to be extended. If the entry to be extended does not exist and the parameter is nullable,
-     *   `null` will be passed.
-     *
-     * @return callable[]
-     */
-    public function getExtensions()
-    {
-        // TODO: Implement getExtensions() method.
     }
 }
