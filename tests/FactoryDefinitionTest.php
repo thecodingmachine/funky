@@ -7,6 +7,7 @@ use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use \ReflectionMethod;
 use TheCodingMachine\Funky\Annotations\Factory;
+use TheCodingMachine\Funky\Annotations\Tag;
 use TheCodingMachine\Funky\Fixtures\TestServiceProvider;
 
 class FactoryDefinitionTest extends TestCase
