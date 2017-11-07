@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace TheCodingMachine\Funky\Annotations;
 
-use Doctrine\Common\Annotations\AnnotationException;
+use Doctrine\Common\Annotations\Annotation\Attribute;
 
 /**
  * @Annotation
@@ -13,58 +13,22 @@ use Doctrine\Common\Annotations\AnnotationException;
  *   @Attribute("nameFromType", type = "bool"),
  *   @Attribute("nameFromMethodName", type = "bool"),
  *   @Attribute("aliases", type = "array<string>"),
+ *   @Attribute("tags", type = "array<\TheCodingMachine\Funky\Annotations\Tag>")
  * })
  */
-class Factory
+class Factory extends AbstractAnnotation
 {
     /**
      * @var string[]
      */
     private $aliases = [];
-    /**
-     * @var bool
-     */
-    private $nameFromType = false;
-    /**
-     * @var bool
-     */
-    private $nameFromMethodName = false;
-    /**
-     * @var string|null
-     */
-    private $name;
 
     /**
      * @param mixed[] $attributes
      */
     public function __construct(array $attributes = [])
     {
-        $count = 0;
-        if (isset($attributes['nameFromType'])) {
-            $this->nameFromType = $attributes['nameFromType'];
-            if ($this->nameFromType) {
-                $count++;
-            }
-        }
-        if (isset($attributes['nameFromMethodName'])) {
-            $this->nameFromMethodName = $attributes['nameFromMethodName'];
-            if ($this->nameFromMethodName) {
-                $count++;
-            }
-        }
-        if (isset($attributes['name'])) {
-            $this->name = $attributes['name'];
-            $count++;
-        }
-
-        if ($count === 0) {
-            $this->nameFromType = true;
-        }
-        if ($count > 1) {
-            throw new AnnotationException('Factory should have only one property in the list "name", "nameFromType", '
-                .'"nameFromMethodName". You can add aliases if you need several names.');
-        }
-
+        parent::__construct($attributes);
         if (isset($attributes['aliases']) && \is_array($attributes['aliases'])) {
             $this->setAliases(...$attributes['aliases']);
         }
@@ -87,17 +51,5 @@ class Factory
     public function getAliases(): array
     {
         return $this->aliases;
-    }
-    public function getName(): ?string
-    {
-        return $this->name;
-    }
-    public function isFromType(): bool
-    {
-        return $this->nameFromType;
-    }
-    public function isFromMethodName(): bool
-    {
-        return $this->nameFromMethodName;
     }
 }

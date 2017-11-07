@@ -30,6 +30,8 @@ class ExtensionDefinition extends AbstractDefinition
             $this->name = (string) $annotation->getName();
         }
 
+        $this->tags = $annotation->getTags();
+
         parent::__construct($reflectionMethod);
     }
 

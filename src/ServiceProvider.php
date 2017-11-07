@@ -4,10 +4,12 @@ declare(strict_types=1);
 namespace TheCodingMachine\Funky;
 
 use Doctrine\Common\Annotations\AnnotationReader;
+use Doctrine\Common\Annotations\AnnotationRegistry;
 use Interop\Container\ServiceProviderInterface;
 use ReflectionClass;
 use TheCodingMachine\Funky\Annotations\Extension;
 use TheCodingMachine\Funky\Annotations\Factory;
+use TheCodingMachine\Funky\Annotations\Tag;
 use TheCodingMachine\Funky\Utils\FileSystem;
 
 class ServiceProvider implements ServiceProviderInterface
@@ -27,6 +29,9 @@ class ServiceProvider implements ServiceProviderInterface
     private static function getAnnotationReader() : AnnotationReader
     {
         if (self::$annotationReader === null) {
+            AnnotationRegistry::registerLoader('class_exists');
+
+
             self::$annotationReader = new AnnotationReader();
         }
         return self::$annotationReader;
@@ -194,7 +199,14 @@ class ServiceProvider implements ServiceProviderInterface
         $factoriesArrayCode = [];
         $factories = [];
         $factoryCount = 0;
-        foreach ($this->getFactoryDefinitions() as $definition) {
+
+        $extensionsArrayCode = [];
+        $extensions = [];
+        $extensionCount = 0;
+
+        $factoriesDefinitions = $this->getFactoryDefinitions();
+
+        foreach ($factoriesDefinitions as $definition) {
             if ($definition->isPsrFactory()) {
                 $factoriesArrayCode[] = '            '.var_export($definition->getName(), true).
                     ' => ['.var_export($definition->getReflectionMethod()->getDeclaringClass()->getName(), true).
@@ -212,19 +224,47 @@ class ServiceProvider implements ServiceProviderInterface
             }
         }
 
-        $factoriesArrayStr = implode("\n", $factoriesArrayCode);
-        $factoriesStr = implode("\n", $factories);
+        $extensionsDefinitions = $this->getExtensionDefinitions();
 
-        $extensionsArrayCode = [];
-        $extensions = [];
-        $extensionCount = 0;
-        foreach ($this->getExtensionDefinitions() as $definition) {
+        foreach ($extensionsDefinitions as $definition) {
             $extensionCount++;
             $localExtensionName = 'extension'.$extensionCount;
             $extensionsArrayCode[] = '            '.var_export($definition->getName(), true).
                 ' => [self::class, '.var_export($localExtensionName, true)."],\n";
             $extensions[] = $definition->buildExtensionCode($localExtensionName);
         }
+
+        // Now, let's handle tags.
+        // Let's build an array of tags with a list of services in it.
+        $tags = [];
+        foreach ($factoriesDefinitions as $factoryDefinition) {
+            foreach ($factoryDefinition->getTags() as $tag) {
+                $tags[$tag->getName()][] = [
+                    'taggedService' => $factoryDefinition->getName(),
+                    'priority' => $tag->getPriority()
+                ];
+            }
+        }
+        foreach ($extensionsDefinitions as $extensionDefinition) {
+            foreach ($extensionDefinition->getTags() as $tag) {
+                $tags[$tag->getName()][] = [
+                    'taggedService' => $extensionDefinition->getName(),
+                    'priority' => $tag->getPriority()
+                ];
+            }
+        }
+
+        foreach ($tags as $tagName => $taggedServices) {
+            $tagMethodName = 'tag__'.$tagName;
+            $tagMethodName = preg_replace("/[^A-Za-z0-9_\x7f-\xff ]/", '', $tagMethodName);
+
+            $extensionsArrayCode[] = '            '.var_export($tagName, true).
+                ' => [self::class, '.var_export($tagMethodName, true)."],\n";
+            $extensions[] = $this->buildTagsCode($tagMethodName, $taggedServices);
+        }
+
+        $factoriesArrayStr = implode("\n", $factoriesArrayCode);
+        $factoriesStr = implode("\n", $factories);
 
         $extensionsArrayStr = implode("\n", $extensionsArrayCode);
         $extensionsStr = implode("\n", $extensions);
@@ -258,5 +298,35 @@ $extensionsStr
 EOF;
 
         return $code;
+    }
+
+    private function buildTagsCode(string $tagMethodName, array $taggedServices): string
+    {
+        $inserts = [];
+
+        foreach ($taggedServices as $tag) {
+            ['taggedService' => $taggedService, 'priority' => $priority] = $tag;
+            $inserts[] = sprintf(
+                '        $queue->insert($container->get(%s), %s);',
+                var_export($taggedService, true),
+                var_export($priority, true)
+            );
+        }
+
+
+        return sprintf(
+            <<<EOF
+    public static function %s(ContainerInterface \$container, ?\SplPriorityQueue \$queue): \SplPriorityQueue
+    {
+        \$queue = \$queue ?: new \SplPriorityQueue();
+%s
+        return \$queue;
+    }
+    
+EOF
+            ,
+            $tagMethodName,
+            implode("\n", $inserts)
+        );
     }
 }

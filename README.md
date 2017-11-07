@@ -56,8 +56,9 @@ class WhoopsMiddlewareServiceProvider implements ServiceProviderInterface
 class WhoopsMiddlewareServiceProvider extends Funky\ServiceProvider
 {
     /**
-     * @Factory
-     * @Tag(name="middlewares.queue", priority=MiddlewareOrder::EXCEPTION_EARLY)
+     * @Factory(
+     *   tags={@Tag(name="middlewares.queue", priority=MiddlewareOrder::EXCEPTION_EARLY)}
+     * )
      */
     public static function createMiddleware() : WhoopsMiddleware
     {
@@ -68,7 +69,19 @@ class WhoopsMiddlewareServiceProvider extends Funky\ServiceProvider
 
 Funky implements the `getFactories` and `getExtensions` methods.
 
-Your class simply extends `Funky\ServiceProvider`. Funky will scan your class for `@Factory` and `@Extension` annotations.
+Your class simply extends `TheCodingMachine\Funky\ServiceProvider`. Funky will scan your class for `@Factory` and `@Extension` annotations.
+
+## Install
+
+Simply require `thecodingmachine/funky` from your service provider package.
+
+```php
+$ composer require thecodingmachine/funky
+```
+
+## Usage
+
+Instead of creating a class that implements `Interop\Container\ServiceProviderInterface`, you extend the `TheCodingMachine\Funky\ServiceProvider` class.
 
 ## The @Factory annotation
 
@@ -215,6 +228,60 @@ public static function twig(\Twig_Environment $twig, MyTwigExtension $extension)
 }
 ```
 
+## Tags
+
+Out of the box, the [container-interop/service-provider](https://github.com/container-interop/service-provider/) does not have a notion of tags. However, you can build entries in your container that are actually an array of services. Those arrays can be regarded as "tags".
+
+Funky offers you an easy way to tag services, using the `@Tag` annotation. This is a great way to remove a lot of boilerplate code!
+
+Here is an example:
+
+```php
+/**
+ * @Factory(
+ *     tags={@Tag(name="twigExtensions")}
+ * ) 
+ */
+public static function myTwigExtension(\Twig_Environment $twig, MyTwigExtension $extension) : \MyTwigExtension
+{
+    // ...
+}
+```
+
+This piece of code declares a `\MyTwigExtension` entry, and adds this entry to the `twigExtensions` tag.
+
+Thereafter, you can fetch the tagged services from the container easily.
+
+For instance:
+
+```php
+/**
+ * Here, the tag "twigExtensions" used in the function above is injected using auto-wiring.  
+ * @Factory()
+ */
+public static function twig(iterable $twigExtensions) : \Twig_Environment
+{
+    // ...
+    $twig = new Twig_Environement(...);
+    foreach ($twigExtensions as $twigExtension) {
+        $twig->register($twigExtension);
+    }
+}
+```
+
+You can specify an optional priority level for each tagged service:
+
+```php
+/**
+ * @Factory(
+ *     tags={@Tag(name="my.tag", priority=42.1)}
+ * ) 
+ */
+```
+
+Low priority items will appear first. High priority items will appear last.
+
+Note: under the hood, the tagged services are actually `\SplPriorityQueue` objects. Those are iterables, but are not PHP arrays. If you need arrays, you can use the `iterator_to_array` PHP function to cast those in arrays.
 
 ## FAQ
 

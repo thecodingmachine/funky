@@ -9,7 +9,9 @@ use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Simplex\Container;
+use TheCodingMachine\Funky\Annotations\Extension;
 use TheCodingMachine\Funky\Annotations\Factory;
+use TheCodingMachine\Funky\Annotations\Tag;
 use TheCodingMachine\Funky\Fixtures\TestServiceProvider;
 use TheCodingMachine\Funky\Utils\FileSystem;
 
@@ -135,5 +137,27 @@ class ServiceProviderTest extends TestCase
 
         $this->assertSame('42'.NullLogger::class.'1242', $result);
 
+    }
+
+    public function testTags()
+    {
+        $sp = new TestServiceProvider();
+
+        $extensions = $sp->getExtensions();
+
+        $this->assertArrayHasKey('mytag1', $extensions);
+        $this->assertArrayHasKey('mytag2', $extensions);
+        $this->assertArrayHasKey('mytag3', $extensions);
+
+        $simplex = new Container();
+        $simplex->register($sp);
+
+        $mytag1 = $simplex->get('mytag1');
+        /* @var $mytag1 \SplPriorityQueue */
+        $this->assertInstanceOf(\SplPriorityQueue::class, $mytag1);
+        $this->assertCount(2, $mytag1);
+        $mytag1array = iterator_to_array($mytag1);
+        $this->assertSame('foo', $mytag1array[0]);
+        $this->assertSame('bar', $mytag1array[1]);
     }
 }

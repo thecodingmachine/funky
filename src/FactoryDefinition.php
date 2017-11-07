@@ -33,6 +33,8 @@ class FactoryDefinition extends AbstractDefinition
             $this->name = (string) $annotation->getName();
         }
 
+        $this->tags = $annotation->getTags();
+
         parent::__construct($reflectionMethod);
         $this->aliases = $annotation->getAliases();
     }
