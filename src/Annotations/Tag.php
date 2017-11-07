@@ -18,7 +18,7 @@ class Tag
      */
     private $name;
     /**
-     * @var float|null
+     * @var float
      */
     private $priority;
 

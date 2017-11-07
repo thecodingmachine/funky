@@ -300,6 +300,11 @@ EOF;
         return $code;
     }
 
+    /**
+     * @param string $tagMethodName
+     * @param array[] $taggedServices
+     * @return string
+     */
     private function buildTagsCode(string $tagMethodName, array $taggedServices): string
     {
         $inserts = [];
