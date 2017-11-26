@@ -160,4 +160,15 @@ class ServiceProviderTest extends TestCase
         $this->assertSame('foo', $mytag1array[0]);
         $this->assertSame('bar', $mytag1array[1]);
     }
+
+    public function testExtendNonExistentService()
+    {
+        $sp = new TestServiceProvider();
+
+        $simplex = new Container();
+        $simplex->register($sp);
+
+        $value = $simplex->get('extendNonExistent');
+        $this->assertSame('foo', $value);
+    }
 }
