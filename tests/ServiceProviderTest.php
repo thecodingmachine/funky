@@ -149,8 +149,7 @@ class ServiceProviderTest extends TestCase
         $this->assertArrayHasKey('mytag2', $extensions);
         $this->assertArrayHasKey('mytag3', $extensions);
 
-        $simplex = new Container();
-        $simplex->register($sp);
+        $simplex = new Container([$sp]);
 
         $mytag1 = $simplex->get('mytag1');
         /* @var $mytag1 \SplPriorityQueue */
@@ -165,8 +164,7 @@ class ServiceProviderTest extends TestCase
     {
         $sp = new TestServiceProvider();
 
-        $simplex = new Container();
-        $simplex->register($sp);
+        $simplex = new Container([$sp]);
 
         $value = $simplex->get('extendNonExistent');
         $this->assertSame('foo', $value);
