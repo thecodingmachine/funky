@@ -169,4 +169,14 @@ class ServiceProviderTest extends TestCase
         $value = $simplex->get('extendNonExistent');
         $this->assertSame('foo', $value);
     }
+
+    public function testExtendNonExistentNullableService()
+    {
+        $sp = new TestServiceProvider();
+
+        $simplex = new Container([$sp]);
+
+        $value = $simplex->get('extendNonExistentNullable');
+        $this->assertNull($value);
+    }
 }

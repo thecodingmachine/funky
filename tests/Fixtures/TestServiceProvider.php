@@ -79,4 +79,14 @@ class TestServiceProvider extends ServiceProvider
     {
         return $value;
     }
+
+    /**
+     * @Extension(
+     *     name="extendNonExistentNullable"
+     * )
+     */
+    public static function extendNotExistentNullable(?string $value) : ?string
+    {
+        return $value;
+    }
 }
