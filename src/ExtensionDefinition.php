@@ -69,7 +69,8 @@ class ExtensionDefinition extends AbstractDefinition
             if ($previousParameter->isDefaultValueAvailable()) {
                 $previousParameterCode .= ' = '.var_export($previousParameter->getDefaultValue(), true);
             } elseif ($previousParameter->allowsNull()) {
-                // If a first argument has no default null value but is nullable (because of ?), we still put the null default value.
+                // If a first argument has no default null value but is nullable (because of ?),
+                // we still put the null default value.
                 $previousParameterCode .= ' = null';
             }
         }
