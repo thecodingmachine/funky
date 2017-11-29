@@ -86,7 +86,7 @@ EOF
         $code = $extensionDefinition->buildExtensionCode('foo');
 
         $this->assertSame(<<<EOF
-    public static function foo(ContainerInterface \$container, \DateTimeInterface \$previous = NULL): \DateTimeInterface
+    public static function foo(ContainerInterface \$container, ?\DateTimeInterface \$previous = NULL): \DateTimeInterface
     {
         return \TheCodingMachine\Funky\Fixtures\TestServiceProvider::testExtension2(\$previous);
     }

@@ -69,4 +69,14 @@ class TestServiceProvider extends ServiceProvider
     {
         return 'bar';
     }
+
+    /**
+     * @Extension(
+     *     name="extendNonExistent"
+     * )
+     */
+    public static function extendNotExistent(string $value = 'foo') : string
+    {
+        return $value;
+    }
 }
