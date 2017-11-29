@@ -40,10 +40,11 @@ class ExtensionDefinition extends AbstractDefinition
         $returnTypeCode = '';
         $returnType = $this->reflectionMethod->getReturnType();
         if ($returnType) {
+            $allowsNull = $returnType->allowsNull() ? '?':'';
             if ($returnType->isBuiltin()) {
-                $returnTypeCode = ': '.$this->reflectionMethod->getReturnType();
+                $returnTypeCode = ': '.$allowsNull.$returnType;
             } else {
-                $returnTypeCode = ': \\'.$this->reflectionMethod->getReturnType();
+                $returnTypeCode = ': '.$allowsNull.'\\'.$returnType;
             }
         }
 
@@ -67,6 +68,9 @@ class ExtensionDefinition extends AbstractDefinition
             $previousParameterCode = ', '.$previousTypeCode.'$previous';
             if ($previousParameter->isDefaultValueAvailable()) {
                 $previousParameterCode .= ' = '.var_export($previousParameter->getDefaultValue(), true);
+            } elseif ($previousParameter->allowsNull()) {
+                // If a first argument has no default null value but is nullable (because of ?), we still put the null default value.
+                $previousParameterCode .= ' = null';
             }
         }
 
