@@ -321,7 +321,7 @@ EOF;
 
         return sprintf(
             <<<EOF
-    public static function %s(ContainerInterface \$container, ?\SplPriorityQueue \$queue): \SplPriorityQueue
+    public static function %s(ContainerInterface \$container, ?\SplPriorityQueue \$queue = null): \SplPriorityQueue
     {
         \$queue = \$queue ?: new \SplPriorityQueue();
 %s

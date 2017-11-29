@@ -60,6 +60,9 @@ class ExtensionDefinition extends AbstractDefinition
                 } else {
                     $previousTypeCode = '\\'.(string) $previousType.' ';
                 }
+                if ($previousParameter->allowsNull()) {
+                    $previousTypeCode = '?'.$previousTypeCode;
+                }
             }
             $previousParameterCode = ', '.$previousTypeCode.'$previous';
             if ($previousParameter->isDefaultValueAvailable()) {
