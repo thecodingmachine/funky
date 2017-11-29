@@ -1,5 +1,5 @@
 parameters:
     ignoreErrors:
-
+     - "#is not subtype of native type array#"
 includes:
     - vendor/thecodingmachine/phpstan-strict-rules/phpstan-strict-rules.neon

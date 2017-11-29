@@ -47,7 +47,7 @@ class ServiceProvider implements ServiceProviderInterface
 
         foreach ($refClass->getMethods() as $method) {
             $factoryAnnotation = self::getAnnotationReader()->getMethodAnnotation($method, Factory::class);
-            if ($factoryAnnotation) {
+            if ($factoryAnnotation instanceof Factory) {
                 $factories[] = new FactoryDefinition($method, $factoryAnnotation);
             }
         }
@@ -65,7 +65,7 @@ class ServiceProvider implements ServiceProviderInterface
 
         foreach ($refClass->getMethods() as $method) {
             $extensionAnnotation = self::getAnnotationReader()->getMethodAnnotation($method, Extension::class);
-            if ($extensionAnnotation) {
+            if ($extensionAnnotation instanceof Extension) {
                 $extensions[] = new ExtensionDefinition($method, $extensionAnnotation);
             }
         }
