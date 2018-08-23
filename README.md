@@ -300,3 +300,19 @@ Given a set of parameters, it will always generate the same result. Therefore, a
 
 Furthermore, compiled containers (like Symfony or PHP-DI) can use the fact that a factory is *public static* to greatly optimize the way they work with the service provider.
 By caching the results given by the `getFactories` and `getExtensions` methods, a compiled container can make the overhead of using Funky to nearly 0.
+
+## Troubleshooting
+
+### It says some file cannot be created
+
+Funky needs to generate some PHP files to be fast. Those files will be written in the Funky 'generated' directory (so most of the time, in `vendor/thecodingmachine/funky/generated`).
+If Funky is called from Apache, Apache might not have the right to write files in this directory.
+You will have to change the rights of this directory to let Apache write in it.
+
+### Some xxxHelper class cannot be autoloaded
+
+As explained above, Funky needs to generate some PHP files to be fast. Those classes are written in the Funky 'generated' directory.
+If you used [Composer's autoritative classmap](https://getcomposer.org/doc/articles/autoloader-optimization.md#optimization-level-2-a-authoritative-class-maps) 
+(for instance with the `--classmap-authoritative` option), Composer will scan all classes of your project to build
+the classmap. Problem: Funky's classes are not yet written! So Composer classmap will miss those classes.
+Therefore, when using Funky, you should not use the `--classmap-authoritative` option.

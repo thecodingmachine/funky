@@ -7,3 +7,5 @@
 /infection-log.txt
 /vendor-bin/cs/vendor/
 /vendor-bin/infection/vendor/
+/generated
+!/generated/.gitkeep

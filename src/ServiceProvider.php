@@ -153,12 +153,10 @@ class ServiceProvider implements ServiceProviderInterface
      */
     private function getFileAndClassName(): array
     {
-        $refClass = $this->getRefClass();
         $className = $this->getClassName();
 
-        $fileName = sys_get_temp_dir().'/funky_cache/'.
-            str_replace(':', '', dirname($refClass->getFileName()).'/'.
-            str_replace('\\', '__', $className).'.php');
+        $fileName = \ComposerLocator::getPath('thecodingmachine/funky').'/generated/'.
+            str_replace('\\', '/', $className).'.php';
 
         return [$className, $fileName];
     }
@@ -173,7 +171,7 @@ class ServiceProvider implements ServiceProviderInterface
 
     private function getClassName(): string
     {
-        $className = get_class($this).'Helper';
+        $className = 'FunkyGenerated\\'.\get_class($this).'Helper';
         if ($this->getRefClass()->isAnonymous()) {
             $className = preg_replace("/[^A-Za-z0-9_\x7f-\xff ]/", '', $className);
         }
